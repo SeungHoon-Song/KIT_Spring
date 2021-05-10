@@ -38,6 +38,8 @@ public class SampleController {
 	@GetMapping("/ex01")
 	public String ex01(SampleDTO dto) {
 		log.info(dto);
+		//addAttribute(Object value)를 사용하면 해당 객체의 클래스타입에서 앞글자가 소문자로 바뀐 단어가 KEY가 된다.
+		//model.addAttribute(dto);
 		return "ex01";
 	}
 	

@@ -1,0 +1,16 @@
+의존성 주입
+
+1. 순서
+	-준비 @Component, @Service, @Controller, @Repository, <bean> 등을 통해
+		root-context.xml에 등록된 Bean이 Context에 할당
+	-주입 @AutoWired로 요청 -> root-context.xml -> 주입
+		※ @Qualifier("A")를 사용하면 동일한 타입 중 골라서 주입할 수 있음.
+		* A : id를 설정했다면 id값 작성, 어노테이션으로 설정했다면 해당 클래스의
+			앞글자만 소문자로 변경된 id값 작성
+			예) <bean id="a" ...> @Qualifier("a")
+			    @Repository
+			class A_Repository	-> @Qualifier("a_Repository")
+
+2. 목적
+	해당 필드를 사용하는 로직에서 다양한 선택을 할 수 있도록 설계하기 위함. 
+	선언부와 사용부의 주소를 같이 공유해야 하며, 개발의 유연성을 유지하기 위함
