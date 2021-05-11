@@ -1,0 +1,4 @@
+mapper.xml -> Mapper 인터페이스 -> Service 인터페이스(재사용,느슨한 결합위해) -> 컨트롤러
+	MyBatis(PreparedStatement("SQL"))
+		executeQuery
+		executeUpdate

@@ -1,0 +1,11 @@
+프레젠테이션 계층의 구현과 테스트
+※ 학습 목표 : WAS를 직접 실행하지 않고 Controller를 테스트할 수 있다.
+
+Task		URL		Method		Parameter		Form	URL 이동
+
+전체목록		/board/list	GET					
+등록처리		/board/register	POST		모든 항목		필요	이동
+조회		/board/get	GET		bno			
+삭제처리		/board/remove	GET		bno			이동
+수정처리		/board/modify	POST		모든 항목		필요	이동
+-----------------------------------------------------------------------------------------------------------------
