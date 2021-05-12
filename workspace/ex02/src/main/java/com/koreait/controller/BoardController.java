@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.koreait.domain.BoardVO;
+import com.koreait.domain.Criteria;
+import com.koreait.domain.pageDTO;
 import com.koreait.service.BoardService;
 
 import lombok.AllArgsConstructor;
@@ -23,10 +25,15 @@ public class BoardController {
 	private BoardService service;
 	
 	@GetMapping("/list")
-	public void list(Model model) {
+	public void list(Criteria cri, Model model) {
 		log.info("list");
-		model.addAttribute("list",service.getList());
+		model.addAttribute("list", service.getList(cri));
+//		model.addAttribute("pageMaker", new pageDTO(cri, 123));
+		model.addAttribute("pageMaker", new pageDTO(cri, service.getTotal()));
 	}
+	
+	@GetMapping("/register")
+	public void register() {}
 	
 	@PostMapping("/register")
 	public String register(BoardVO board, /*Model model*/ RedirectAttributes rttr) {
@@ -46,7 +53,7 @@ public class BoardController {
 	}
 	
 	//조회 처리와 테스트 구현
-	@GetMapping("/get")
+	@GetMapping({"/get", "/modify"})
 	//RequestParam은 객체와 일반 변수가 동시에 있을 때 분리하기 위해 작성한다.
 	public void get(@RequestParam("bno") Long bno, Model model) {
 		model.addAttribute("board", service.get(bno));	

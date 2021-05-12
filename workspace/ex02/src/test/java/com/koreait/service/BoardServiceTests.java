@@ -9,6 +9,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.koreait.domain.BoardVO;
+import com.koreait.domain.Criteria;
 
 import lombok.Setter;
 import lombok.extern.log4j.Log4j;
@@ -17,16 +18,21 @@ import lombok.extern.log4j.Log4j;
 @ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")//지정된 클래스나 문자열을 이용해서 필요한 객체들을 스프링 내에 객체로 등록
 @Log4j
 public class BoardServiceTests {
-	@Setter(onMethod_=@Autowired)
+	@Setter(onMethod_ = @Autowired)
 	private BoardService service;
 
 	@Test
-	public void testRemove() {
-		Long bno = 1L;
-		//만약 해당 게시글이 존재하지 않으면 remove 하지 않도록 막아주기
-		if(service.get(bno) == null) {return;}
-		log.info("REMOVE RESULT : " + service.remove(bno));
+	public void testGetList() {
+		service.getList(new Criteria(1, 30)).forEach(board -> log.info(board));
 	}
+	
+//	@Test
+//	public void testRemove() {
+//		Long bno = 1L;
+//		//만약 해당 게시글이 존재하지 않으면 remove 하지 않도록 막아주기
+//		if(service.get(bno) == null) {return;}
+//		log.info("REMOVE RESULT : " + service.remove(bno));
+//	}
 	
 //	@Test
 //	public void testModify() {
