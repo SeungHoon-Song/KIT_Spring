@@ -1,0 +1,99 @@
+검색 처리
+	제목, 내용, 작성자 : 단일
+	제목 or 내용, 제목 or 작성자, 내용 or 작성자, 제목 or 내용 or 작성자 : 다중 항목
+
+MyBatis의 동적 태그들
+	if
+	choose(when, otherwise)
+	where
+	trim
+	foreach
+
+|(파이프 연산자) : 컨케이트네이션(연결)
+
+[if]
+	- 검색 조건이 'T' : 제목 항목에서 키워드를 검색
+		<if test="type == 'T'.toString()">
+			TITLE LIKE '%'||#{keyword}||'%'
+		</if>
+
+	- 검색 조건이 'C' : 내용 항목에서 키워드를 검색
+		<if test="type == 'C'.toString()">
+			CONTENT LIKE '%'||#{keyword}||'%'
+		</if>
+
+	- 검색 조건이 'W' : 작성자 항목에서 키워드를 검색
+		<if test="type == 'W'.toString()">
+			WRITER LIKE '%'||#{keyword}||'%'
+		</if>
+
+[choose]
+	<choose>
+	<when test="type == 'T'.toString()">
+		TITLE LIKE '%'||#{keyword}||'%'
+	</when>
+	<when test="type == 'C'.toString()">
+		CONTENT LIKE '%'||#{keyword}||'%'
+	</when>
+	<when test="type == 'W'.toString()">
+		WRITER LIKE '%'||#{keyword}||'%'
+	</when>
+	<otherwise>
+		TITLE LIKE '%'||#{keyword}||'%' OR CONTENT LIKE '%'||#{keyword}||'%' OR WRITER LIKE '%'||#{keyword}||'%'
+	</otherwise>
+	</choose>
+
+[where]
+	SELECT * FROM TBL_TABLE
+	<where>
+		<if test="bno != null">
+			BNO = #{bno}
+		</if>
+	</where>
+
+[trim]
+	SELECT * FROM TBL_TABLE
+	<where>
+		<if test="bno != null">
+			BNO = #{bno}
+		</if>
+		<trim prefixOverrides="AND">
+			ROWNUM = 1
+		</trim>	
+	</where>
+
+	*bno가 null일 때
+		SELECT * FROM TBL_BOARD WHERE ROWNUM = 1
+	*bno가 null이 아닐 때
+		SELECT * FROM TBL_BOARD WHERE BNO = #{bno} AND ROWNUM = 1
+
+[foreach]
+	List, 배열 Map 등을 이용해서 루프를 처리한다.
+
+	*파라미터
+	Map<String, String> map = new HashMap<>();
+	map.put("T", "PS5");
+	map.put("C", "판매");
+
+	*쿼리
+	SELECT * FROM TBL_BOARD
+	<if 널이 아닐때>
+	<trim prefix="WHERE(" suffix=")" prefixOverrides="OR">
+		<foreach item="value" index="key" collection="map">
+			<trim prefix="OR">
+			<if test="key=='T'.toString()">
+				TITLE = #{val}
+			</if>
+			<if test="key=='C'.toString()">
+				CONTENT = #{val}
+			</if>
+			<if test="key=='W'.toString()">
+				WRITER = #{val}
+			</if>
+			</trim>
+		</foreach>
+	</trim>
+	</if>
+
+	*결과
+	SELECT * FROM TBL_BOARD WHERE(TITLE = '건담' OR CONTENT = '판매')
