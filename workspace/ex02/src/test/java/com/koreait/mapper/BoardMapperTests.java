@@ -19,12 +19,12 @@ public class BoardMapperTests {
 	@Setter(onMethod_ = @Autowired)
 	private BoardMapper mapper;
 	
-	@Test
+/*	@Test
 	public void testGetListWithPaging() {
 		Criteria cri = new Criteria(2, 20);
 		cri.setPageNum(2);
 		mapper.getListWithPaging(cri).forEach(board -> log.info(board.getBno()));
-	}
+	}*/
 
 /*	@Test
 	public void testUpdate() {
@@ -37,11 +37,11 @@ public class BoardMapperTests {
 		log.info("UPDATE COUNT : " + mapper.update(board));
 	}*/
 	
-/*	@Test
+	@Test
 	public void testDelete() {
-		log.info("DELETE COUNT : " + mapper.delete(1L));
+		log.info("DELETE COUNT : " + mapper.delete(12582937L));
 //		log.info("DELETE COUNT : " + mapper.delete(100L));
-	}*/
+	}
 	
 /*	@Test
 	public void testRead() {

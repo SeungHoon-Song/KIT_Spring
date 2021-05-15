@@ -24,6 +24,9 @@
             .updateDate {display:none;}
             .big-width{display:none;}
             .small-width{display:block;}
+			select{width: 100%;}
+         	input[name='keyword']{width: 100%;}
+         	.search{width: 100%;}
          }
       </style>
    </head>
@@ -39,7 +42,7 @@
                         <p>게시판 목록</p>
                      </header>
                            <!-- Table -->
-                              <h3><a href="/board/register" class="button small">글 등록</a></h3>
+                              <h3><a href="/board/register${pageMaker.cri.getListLink()}" class="button small">글 등록</a></h3>
                               <div class="table-wrapper">
                                  <table>
                                     <thead>
@@ -55,7 +58,7 @@
                                        <c:forEach var="board" items="${list}">
                                           <tr class="tBody">
                                              <td class="bno">${board.bno}</td>
-                                             <td class="title"><a href="/board/get?bno=${board.bno}&pageNum=${pageMaker.cri.pageNum}&amount=${pageMaker.cri.amount}">${board.title}</a></td>
+                                             <td class="title"><a href="/board/get${pageMaker.cri.getListLink()}&bno=${board.bno}">${board.title}</a></td>
                                              <td class="writer">${board.writer}</td>
                                              <td class="regDate">${board.regDate}</td>
                                              <td class="updateDate">${board.updateDate}</td>
@@ -96,12 +99,15 @@
                                     <c:if test="${pageMaker.cri.pageNum < pageMaker.realEnd}">
                                        <a class="changePage" href="${pageMaker.cri.pageNum + 1}"><code>&gt;</code></a>
                                        <a class="changePage" href="${pageMaker.realEnd}"><code>&gt;&gt;</code></a>
+                                       
                                     </c:if>
                                  </div>
                                  
                                  <form id="actionForm" action="/board/list">
                                     <input type="hidden" name="pageNum" value="${pageMaker.cri.pageNum}">
                                     <input type="hidden" name="amount" value="${pageMaker.cri.amount}">
+                                    <input type="hidden" name="type" value="${pageMaker.cri.type}">
+                                    <input type="hidden" name="keyword" value="${pageMaker.cri.keyword}">
                                  </form>
                                  <!-- B -->
                                  <form action="/board/list" id="searchForm">
@@ -109,15 +115,15 @@
                                        <div class="field">
                                           <div style="text-align:center">
                                              <select name="type">
-                                                <option value="">검색 기준</option>
-                                                <option value="T">제목</option>
-                                                <option value="C">내용</option>
-                                                <option value="W">작성자</option>
-                                                <option value="TC">제목 또는 내용</option>
-                                                <option value="TW">제목 또는 작성자</option>
-                                                <option value="TCW">전체</option>
+                                                <option value="" ${pageMaker.cri.type == null ? 'selected' : ''}>검색 기준</option>
+                                                <option value="T" ${pageMaker.cri.type == 'T' ? 'selected' : ''}>제목</option>
+                                                <option value="C" ${pageMaker.cri.type == 'C' ? 'selected' : ''}>내용</option>
+                                                <option value="W" ${pageMaker.cri.type == 'W' ? 'selected' : ''}>작성자</option>
+                                                <option value="TC" ${pageMaker.cri.type == 'TC' ? 'selected' : ''}>제목 또는 내용</option>
+                                                <option value="TW" ${pageMaker.cri.type == 'TW' ? 'selected' : ''}>제목 또는 작성자</option>
+                                                <option value="TCW" ${pageMaker.cri.type == 'TCW' ? 'selected' : ''}>전체</option>
                                              </select>
-                                             <input id="keyword" type="text" name="keyword">
+                                             <input id="keyword" type="text" name="keyword" value="${pageMaker.cri.keyword}">
                                              <a href="javascript:void(0)" class="search button primary icon solid fa-search">검색</a>
                                           </div>
                                        </div>

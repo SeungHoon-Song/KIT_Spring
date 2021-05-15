@@ -21,12 +21,14 @@
                         <h1>Board</h1>
                         <p>게시글 등록</p>
                      </header>
-                     <h3><a href="/board/list?pageNum=${cri.pageNum}&amount=${cri.amount}" class="button small">목록 보기</a></h3>
+                     <h3><a href="/board/list${cri.getListLink()}" class="button small">목록 보기</a></h3>
                   <div class="content">
                      <div class="form">
                         <form action="/board/remove">	<!-- GET방식 생략 -->
                         	<input type="hidden" name="pageNum" value="${cri.pageNum}">
                             <input type="hidden" name="amount" value="${cri.amount}">
+                            <input type="hidden" name="keyword" value="${cri.keyword}">
+                            <input type="hidden" name="type" value="${cri.type}">
                            <div class="fields">
                               <div class="field">
                                  <h4>번호</h4>
@@ -47,7 +49,7 @@
                            </div>
                            <ul class="actions special">
                               <li>
-                                 <input type="button" class="button" value="수정" onclick="location.href='/board/modify?bno=${board.bno}&pageNum=${cri.pageNum}&amount=${cri.amount}'"/>
+                                 <input type="button" class="button" value="수정" onclick="location.href='/board/modify${cri.getListLink()}&bno=${board.bno}'"/>
                                  <input type="submit" class="button" value="삭제"/>
                               </li>
                            </ul>

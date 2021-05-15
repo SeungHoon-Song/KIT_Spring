@@ -29,11 +29,12 @@ public class BoardController {
 		log.info("list");
 		model.addAttribute("list", service.getList(cri));
 //		model.addAttribute("pageMaker", new pageDTO(cri, 123));
-		model.addAttribute("pageMaker", new pageDTO(cri, service.getTotal()));
+		//getTotal(Criteria) : type과 keyword가 전달되면 검색된 게시글의 건수이며, 검색하지 않으면 전체 게시글의 건수이다.
+		model.addAttribute("pageMaker", new pageDTO(cri, service.getTotal(cri)));
 	}
 	
 	@GetMapping("/register")
-	public void register() {}
+	public void register(@ModelAttribute("cri") Criteria cri) {log.info(cri);}
 	
 	@PostMapping("/register")
 	public String register(BoardVO board, /*Model model*/ RedirectAttributes rttr) {
@@ -84,6 +85,8 @@ public class BoardController {
 		//따라서 반드시 해당 객체의 생성자에 전달할 필드명과 일치하도록 설정해주어야 한다.
 		rttr.addAttribute("pageNum", cri.getPageNum());
 		rttr.addAttribute("amount", cri.getAmount());
+		rttr.addAttribute("keyword", cri.getKeyword());
+		rttr.addAttribute("type", cri.getType());
 		
 		return "redirect:/board/list";
 	}
@@ -97,6 +100,8 @@ public class BoardController {
 		
 		rttr.addAttribute("pageNum", cri.getPageNum());
 		rttr.addAttribute("amount", cri.getAmount());
+		rttr.addAttribute("keyword", cri.getKeyword());
+		rttr.addAttribute("type", cri.getType());
 		
 		return "redirect:/board/list";
 	}

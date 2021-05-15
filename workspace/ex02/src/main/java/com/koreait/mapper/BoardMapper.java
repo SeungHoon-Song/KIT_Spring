@@ -13,7 +13,7 @@ public interface BoardMapper {
 	
 	public List<BoardVO> getListWithPaging(Criteria cri);
 	
-	public int getTotal();
+	public int getTotal(Criteria cri);
 	
 	public void insert(BoardVO board);
 	

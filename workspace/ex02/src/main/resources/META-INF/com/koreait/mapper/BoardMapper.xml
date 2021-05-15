@@ -55,8 +55,20 @@
 		]]>
 	</select>
 	
+	<!-- 검색된 게시물의 전체 개수 -->
+	<!-- <select id="getTotal" resultType="_int">
+		SELECT COUNT(BNO) FROM TBL_BOARD WHERE 
+				<include refid="criteria"/>
+				<![CDATA[BNO > 0]]>
+	</select> -->
+	
 	<select id="getTotal" resultType="_int">
-		SELECT COUNT(BNO) FROM TBL_BOARD
+		SELECT COUNT(BNO) FROM TBL_BOARD 
+		<where>
+			<trim suffixOverrides="AND">
+				<include refid="criteria"/>
+			</trim>
+		</where>
 	</select>
 	
 	<insert id="insert">
