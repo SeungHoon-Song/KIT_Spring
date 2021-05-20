@@ -6,43 +6,43 @@
 	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
 		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
-
+	
 	<!-- Root Context: defines shared resources visible to all other web components -->
-	<!-- HikariConfig hikariConfig = new HikariConfig() -->
-	<!-- hikariConfig.setDriverClassName("") -->
-	<!-- hikariConfig.jdbcUrl("") -->
-	<!-- hikariConfig.username("") -->
-	<!-- hikariConfig.password("") -->
+	
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<!-- HikariConfig hikariConfig = new HikariConfig(); -->
+	<!-- hikariConffig.setDriverClassName(""); -->
+	<!-- hikariConffig.jdbcUrl(""); -->
+	<!-- hikariConffig.username(""); -->
+	<!-- hikariConffig.password(""); -->
 	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
-		<!-- <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/> 
-			<property name="jdbcUrl" value="jdbc:oracle:thin:@localhost:1521:XE"/> -->
-		<property name="driverClassName"
-			value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy" />
-		<property name="jdbcUrl"
-			value="jdbc:log4jdbc:oracle:thin:@localhost:1521:XE" />
-		<property name="username" value="hr" />
-		<property name="password" value="hr" />
+		<!-- <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+		<property name="jdbcUrl" value="jdbc:oracle:thin:@132.226.169.45:1521:XE"/> -->
+		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"/>
+		<!-- <property name="jdbcUrl" value="jdbc:log4jdbc:oracle:thin:@132.226.169.45:1521:XE"/> -->
+<!-- 		<property name="jdbcUrl" value="jdbc:log4jdbc:oracle:thin:@132.226.228.201:1515:XE"/> -->
+		<property name="jdbcUrl" value="jdbc:log4jdbc:oracle:thin:@localhost:1521:XE"/>
+		<property name="username" value="hr"/>
+		<property name="password" value="hr"/>
 	</bean>
-
+	
 	<!-- DataSource dataSource = new DataSource(hikariConfig) -->
-	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource"
-		destroy-method="close">
-		<constructor-arg ref="hikariConfig" />
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+		<constructor-arg ref="hikariConfig"/>
 	</bean>
-	<bean id="sqlSessionFactory"
-		class="org.mybatis.spring.SqlSessionFactoryBean">
-		<property name="dataSource" ref="dataSource" />
- 		<property name="mapperLocations"
-			value="classpath:/META-INF/com/koreait/mapper/**/*.xml" />
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="mapperLocations" value="classpath:/META-INF/com/koreait/mapper/**/*.xml"/>
 		<property name="configuration">
 			<bean class="org.apache.ibatis.session.Configuration">
 				<property name="mapUnderscoreToCamelCase" value="true"/>
 			</bean>
 		</property>
-<!-- 		<property name="configLocation" 
-			value="classpath:/META-INF/com/koreait/config/MapperConfig.xml"/> -->
 	</bean>
+	
 	<mybatis-spring:scan base-package="com.koreait.mapper"/>
 	<context:component-scan base-package="com.koreait.service"/>
-	<context:component-scan base-package="com.koreait.exception"/>	
+	<context:component-scan base-package="com.koreait.exception" />
 </beans>

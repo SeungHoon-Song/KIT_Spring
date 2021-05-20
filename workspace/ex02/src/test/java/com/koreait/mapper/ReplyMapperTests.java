@@ -31,14 +31,14 @@ public class ReplyMapperTests {
 	// 게시글 번호 배열
 	private Long[] arBno = { 3145905L, 3145904L, 3145903L, 3145902L, 3145901L };
 	
-	@Test
+	/*@Test
 	public void testUpdate() {
 		ReplyVO reply = new ReplyVO();
 		reply.setReply("수정된 댓글 내용");
 		reply.setRno(2L);
 		
 		log.info("UPDATE COUNT : " + mapper.update(reply));
-	}
+	}*/
 
 /*	@Test
 	public void testDelete() {
@@ -55,7 +55,7 @@ public class ReplyMapperTests {
 		log.info(mapper.read(1L));
 	}*/
 	
-/*	@Test
+	/*@Test
 	public void testInsert() {
 		List<BoardVO> boards = board.getListWithPaging(new Criteria(1, 5));
 		// 5개의 게시글에 2개씩 댓글 달기(IntStream을 사용해서 반복한다)
