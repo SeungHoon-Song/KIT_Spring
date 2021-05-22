@@ -36,7 +36,9 @@ var replyService = (function(){
 		var page = param.page || 1;
 		$.getJSON("/replies/pages/" +bno+ "/" +page+ ".json",
 				function(data){
-					if(callback){callback(data);}
+				//getList 컨트롤러에서는 댓글 목록과 댓글 전체 개수를 응답해준다.
+				//따로 전달받지 않고 ReplyPageDTO객체로 한 번에 전달 받는다.
+					if(callback){callback(data.replyCnt, data.list);}	//callback함수에 전체 개수와 목록을 따로 전달해준다.
 		}).fail(function(xhr, status, er){
 					if(error){error(er);}
 		});

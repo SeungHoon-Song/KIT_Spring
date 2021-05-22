@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.koreait.domain.Criteria;
+import com.koreait.domain.ReplyPageDTO;
 import com.koreait.domain.ReplyVO;
 import com.koreait.service.ReplyService;
 
@@ -49,12 +50,13 @@ public class ReplyController {
    
    //게시글 댓글 전체 조회
    @GetMapping(value="/pages/{bno}/{page}", produces= {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-   public ResponseEntity<List<ReplyVO>> getList(@PathVariable("bno") Long bno, @PathVariable("page") int page){
+   //서비스에 있는 getListWithPaging은 댓글 목록과 댓글 전체 개수 두 개를 갖고 있는 ReplyPageDTO 타입이다. 
+   public ResponseEntity<ReplyPageDTO> getList(@PathVariable("bno") Long bno, @PathVariable("page") int page){
       log.info("getList..........");
       Criteria cri = new Criteria(page, 10);
       log.info(cri);
       
-      return new ResponseEntity<List<ReplyVO>>(service.getListWithPaging(cri, bno), HttpStatus.OK);
+      return new ResponseEntity<ReplyPageDTO>(service.getListWithPaging(cri, bno), HttpStatus.OK);
    }
    
    //댓글 조회

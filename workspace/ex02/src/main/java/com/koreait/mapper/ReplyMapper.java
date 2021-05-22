@@ -21,4 +21,6 @@ public interface ReplyMapper {
 	 * 별도의 객체를 구성하거나 Map을 이용, @Param을 이용한다.
 	 */
 	public List<ReplyVO> getListWithPaging(@Param("cri") Criteria cri, @Param("bno") Long bno);
+	
+	public int getTotal(Long bno);
 }
