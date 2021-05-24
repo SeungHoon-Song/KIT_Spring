@@ -148,7 +148,9 @@
          
          $(".register").on("click", function(e){
             e.preventDefault();
+          	//등록하기 클릭시 폼 보이기
             $(".register-form").show();
+            //등록하기 버튼은 숨겨야함
             $(this).hide();
          });
          
@@ -157,6 +159,14 @@
             $(".register-form").hide();
             $(".register").show();
          });
+         
+       	 //jQuery를 사용했던 이유
+         //웹 표준으로 개발되던 시대가 아니였을 때에는 개발자가 버전별로 다양한 언어들을 공부해야 했다.
+         //그렇기 때문에 웹 표준을 정해놓으면 개발자들이 편하게 개발할 수 있는 상태였다.
+         //바로 이 때 jQuery를 만든 회사에서 JS의 표준화 즉, 통일성을 주기 위해서 홍보를 하였고,
+         //jQuery 개발자가 대량으로 늘어나며, 거의 모든 프로젝트에서 jQuery가 사용되었다.
+         //하지만 지금은 거의 대부분의 브라우저는 W3C에 의해 표준화된 웹 표준을 사용하기 때문에
+         //jQuery의 목적성을 잃어 가고 있다.
          
          $(".finish").on("click", function(e){
             e.preventDefault();
@@ -169,6 +179,10 @@
             replyService.add({bno:bno, reply:reply, replyer:replyer},
                   function(result){
                      alert(result);
+                     $("textarea[name='reply']").val("");
+                     $("input[name='replyer']").val("");
+                     $(".register-form").hide();
+                     $(".register").show();
                      pageNum = 1;
                      showList(pageNum);
             });
@@ -277,15 +291,18 @@
          //댓글 수정
          $(".replies").on("click", "a.modify", function(e){
              e.preventDefault();
-             
              if(check){alert("이미 수정중인 댓글이 있습니다."); return;}
              
+           	 //1. 수정완료 버튼
+             //2. p태그를 textarea로 변경(기존 p태그의 내용을 textarea로 옮겨야 한다.)
              var rnoValue = $(this).attr("href");
              var replyTag = $(".reply" + rnoValue);
              
              replyTag.html("<textarea class='" + rnoValue + "'>" + replyTag.text() + "</textarea>")
              $(this).hide();
 
+           	 //$(this).parent().find(".finish").show();
+             
         	 
         	 //다 가져오기
              var finishs = $(".finish")	//다 가져옴
