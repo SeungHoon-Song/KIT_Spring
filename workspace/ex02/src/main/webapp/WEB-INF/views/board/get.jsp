@@ -98,7 +98,7 @@
                            </ul>
                            <ul class="icons">
                            	<li>
-                           		<span class="icon solid fa-envelope"></span>
+                           		<i class="far fa-comment"></i>
                            		<strong>댓글</strong>
                            	</li>
                            </ul>
