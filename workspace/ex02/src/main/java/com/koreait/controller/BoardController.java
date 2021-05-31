@@ -39,6 +39,9 @@ public class BoardController {
 	@PostMapping("/register")
 	public String register(BoardVO board, /*Model model*/ RedirectAttributes rttr) {
 		log.info("register : " + board);
+		if(board.getAttachList() != null) {
+			board.getAttachList().forEach(log::info);
+		}
 		service.register(board);
 //		model.addAttribute("result", board.getBno());
 		//새롭게 등록된 번호를 .jsp에 전달하기 위해서는 

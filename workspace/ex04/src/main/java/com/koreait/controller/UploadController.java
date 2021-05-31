@@ -44,7 +44,7 @@ public class UploadController {
 		log.info("upload form");
 	}
 	
-	@GetMapping("/uploadAjax")
+	@GetMapping("/uploadAjax")	//uploadAjax.jsp로 이동
 	public void uploadAjax() {
 		log.info("upload Ajax");
 	}
@@ -113,7 +113,9 @@ public class UploadController {
 			InputStream in = null;
 			try {
 				File saveFile = new File(uploadPath, uploadFileName);
-				multipartFile.transferTo(saveFile);
+				//업로드
+				multipartFile.transferTo(saveFile);	//보내고 읽어올 때 사용
+				//업로드 된 파일 읽어오기
 				in = new FileInputStream(saveFile);	
 				
 				attachDTO.setUuid(uuid.toString());
@@ -123,6 +125,7 @@ public class UploadController {
 				if(checkImg(saveFile)) {
 					attachDTO.setImage(true);
 					//Stream은 파일을 통신할 때 byte가 이동할 경로이다.
+					//썸네일 파일 업로드
 					FileOutputStream thumbnail = new FileOutputStream(new File(uploadPath, "s_" + uploadFileName));
 					//사용자가 첨부한 파일은 multipartFile을 통해서 가져오고,
 					//원하는 width, height를 지정한 후 변경된 이미지 파일을 FileOutputStream 객체를 통해서 업로드한다.
@@ -136,7 +139,9 @@ public class UploadController {
 				log.error(e.getMessage());
 			} finally {
 				try {
-					in.close();
+					if(in != null) {
+						in.close();
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 					throw new RuntimeException();

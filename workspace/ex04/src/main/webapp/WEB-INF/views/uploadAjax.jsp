@@ -74,7 +74,7 @@
 		var uploadFail = $(".uploadFail ul");
 		var cloneObj = $(".uploadDiv").clone();
 		
-		function showUploadFile(uploadResults, tag){
+		function showUploadFile(uploadResults, tag){	//tag: 성공, 실패
 			str = "";
 			$(uploadResults).each(function(i, obj){
 				if(!obj.image){
@@ -142,7 +142,7 @@
 				if(!check(files[i].name, files[i].size)){
 					return false;
 				}
-				formData.append("uploadFile", files[i]);
+				formData.append("uploadFile", files[i]);	//uploadFile 키값은 동일하게
 			}
 			
 			$.ajax({

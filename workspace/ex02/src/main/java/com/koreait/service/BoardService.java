@@ -2,6 +2,7 @@ package com.koreait.service;
 
 import java.util.List;
 
+import com.koreait.domain.BoardAttachVO;
 import com.koreait.domain.BoardVO;
 import com.koreait.domain.Criteria;
 
@@ -26,4 +27,6 @@ public interface BoardService {
 	
 	public List<BoardVO> getList(Criteria cri);
 	
+	//전체 첨부파일 가져오기
+	public List<BoardAttachVO> getAttachList(Long bno);
 }
