@@ -102,6 +102,22 @@
 				return true;
 			}
 			
+			$(".uploadResult").on("click", "span", function(e){
+				var file = $(this).data("file");
+				var type = $(this).data("type");
+				var target = $(this).closest("li");
+				$.ajax({
+					url: "/deleteFile",
+					data: {fileName:file , fileType:type},
+					dataType: "text",
+					type: "post",
+					success: function(result){
+						alert(result);
+						target.remove();
+					}
+				});
+			})
+			
 			$("input[type='submit']").on("click", function(e){
 				e.preventDefault();
 				console.log("submit clicked");
@@ -109,13 +125,13 @@
 				var str = "";
 				
 				$(".uploadResult ul li").each(function(i, obj){
-					str += "<input type='hidden' name='attachList[" + i +"].uploadPath' value='"+ $(obj).data("path") +"'>";
-					str += "<input type='hidden' name='attachList[" + i +"].uuid' value='"+ $(obj).data("uuid") +"'>";
-					str += "<input type='hidden' name='attachList[" + i +"].fileName' value='"+ $(obj).data("filename") +"'>";	//브라우저 filename 소문자
-					str += "<input type='hidden' name='attachList[" + i +"].fileType' value='"+ $(obj).data("type") +"'>";
-				});			
+				//obj는 JS이다, data()는 jQuery이기 때문에 $()로 감싸준다.
+					str += "<input type='hidden' name='attachList[" + i +"].uploadPath' value='" + $(obj).data("path") + "'>";
+					str += "<input type='hidden' name='attachList[" + i +"].uuid' value='" + $(obj).data("uuid") + "'>";
+					str += "<input type='hidden' name='attachList[" + i +"].fileName' value='" + $(obj).data("filename") + "'>";
+					str += "<input type='hidden' name='attachList[" + i +"].fileType' value='" + $(obj).data("type") + "'>";
+				});
 				form.append(str).submit();
-				//obj는 JS이다.
 			});
 			
 			function showUploadResult(uploadResults){
@@ -123,17 +139,18 @@
 				$(uploadResults).each(function(i, obj){
 					if(!obj.fileType){
 						//일반 파일
-						str += "<li data-path='" + obj.uploadPath + "' data-uuid='" + obj.uuid + "' data-filename='" + obj.fileName + "' data-type='" + obj.fileType +"'>";
+						var filePath = encodeURIComponent(obj.uploadPath + "\\" + obj.uuid + "_" + obj.fileName);
+						str += "<li data-path='" + obj.uploadPath + "' data-uuid='" + obj.uuid + "' data-filename='" + obj.fileName + "' data-type='" + obj.fileType + "'>"
 						str += "<div><img src='/resources/images/attach.png' width=100 height=100>";
 						str += "<br>" + obj.fileName;
-						str += "<span><br>x</span></div></li>";
+						str += "&nbsp;&nbsp;&nbsp;<span data-file='" + filePath + "' data-type='file'>x</span></div></li>";
 					}else{
 						//이미지 파일
 						var thumbPath = encodeURIComponent(obj.uploadPath + "\\s_" + obj.uuid + "_" + obj.fileName);
-						str += "<li data-path='" + obj.uploadPath + "' data-uuid='" + obj.uuid + "' data-filename='" + obj.fileName + "' data-type='" + obj.fileType +"'>";
+						str += "<li data-path='" + obj.uploadPath + "' data-uuid='" + obj.uuid + "' data-filename='" + obj.fileName + "' data-type='" + obj.fileType + "'>"
 						str += "<div><img src='/display?fileName=" + thumbPath + "' width=100 height=100>";
 						str += "<br>" + obj.fileName;
-						str += "<span><br>x</span></div></li>";
+						str += "&nbsp;&nbsp;&nbsp;<span data-file='" + thumbPath + "' data-type='image'>x</span></div></li>";
 					}
 				});
 				uploadResult.append(str);
@@ -170,6 +187,7 @@
 						
 						//썸네일 실행
 						showUploadResult(result.succeedList);
+						$(".uploadDiv").html(cloneObj.html());
 					}
 				});
 			});

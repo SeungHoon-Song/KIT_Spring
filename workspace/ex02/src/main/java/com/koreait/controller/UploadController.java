@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,6 +15,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,6 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +39,8 @@ import net.coobird.thumbnailator.Thumbnailator;
 @Log4j
 public class UploadController {
 	
+	//브라우저 상에서 로컬 경로를 직접 작성하면 보안상의 이유로 파일을 가져올 수 없게 된다.
+	//JAVA에 로컬 경로(절대경로)를 작성함으로써 브라우저 내에서 보이지 않도록 숨기는 작업.
 	@GetMapping("/display")
 	@ResponseBody
 	public ResponseEntity<byte[]> getFile(String fileName){
@@ -117,19 +125,87 @@ public class UploadController {
 				log.error(e.getMessage());
 			} finally {
 				try {
-					if(in != null) {
-						in.close();
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw new RuntimeException();
+					
+				}catch (Exception e) {
+					// TODO: handle exception
 				}
 			}
 		}
+		
 		allFile.setSucceedList(succeedList);
 		allFile.setFailureList(failureList);
 		
+		//(1) 어떤 것이 프로세스에서 사용중인 지 모를 때
+		//가비지 컬렉터: 주인이 없는 필드를 직접 찾아서 메모리에서 해제해주는 객체
+		System.gc();	//가비지 컬렉터 호출 - 찾아도 바로 메모리 해제를 하지 않고 세대를 붙여준다. 추후 세대별 메모리 해제는 일괄 처리된다.
+		System.runFinalization();	//세대에 상관없이 필드 메모리 해제(finalization() 호출)
 		return new ResponseEntity<AllFileDTO>(allFile, HttpStatus.OK);
+	}
+	
+	@PostMapping("/deleteFile")
+	@ResponseBody
+	public ResponseEntity<String> deleteFile(String fileName, String fileType){
+		log.info("deleteFile: " + fileName);
+		
+		File file = null;
+		
+		try {
+			file = new File("C:\\upload\\" + URLDecoder.decode(fileName, "UTF-8"));
+		file.delete();
+		
+		if(fileType.equals("image")) {
+			String imgFileName = file.getPath().replace("s_", "");
+			log.info("imgFileName: " + imgFileName);
+			file = new File(imgFileName);
+			
+			//가비지 컬렉터: 주인이 없는 필드를 직접 찾아서 메모리에서 해제해주는 객체
+			System.gc();	//가비지 컬렉터 호출 - 찾아도 바로 메모리 해제를 하지 않고 세대를 붙여준다. 추후 세대별 메모리 해제는 일괄 처리된다.
+			System.runFinalization();	//세대에 상관없이 필드 메모리 해제(finalization() 호출)
+			file.delete();
+		}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<String>("delete", HttpStatus.OK);
+	}
+	
+	@GetMapping(value="/download", produces=MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	@ResponseBody
+	public ResponseEntity<Resource> downloadFile(String fileName, @RequestHeader("User-Agent") String userAgent) {
+		log.info("download file: " + fileName);
+		Resource resource = new FileSystemResource("C:\\upload\\" + fileName);
+		log.info("resource: " + resource);
+		
+		String resourceName = resource.getFilename();
+		String originalName = resourceName.substring(resourceName.indexOf("_") +1);
+		HttpHeaders headers = new HttpHeaders();
+		//다운로드 시 저장되는 이름 : Content-Disposition
+		try {
+			String downloadName = null;
+			//Trident : MSIE
+			if(userAgent.contains("Trident")) {
+				log.info("IE Browser로");
+//				downloadName= URLEncoder.encode(resourceName, "UTF-8").replaceAll("\\", "");
+				downloadName= URLEncoder.encode(originalName, "UTF-8");
+			}else if(userAgent.contains("Edg")) {
+			//Edg : 엣지
+				log.info("Edg로");
+				downloadName= URLEncoder.encode(originalName, "UTF-8");
+			}else {
+			//그 외(크롬)
+				log.info("Chrome Browser");
+				downloadName = new String(originalName.getBytes("UTF-8"), "ISO-8859-1");
+			}
+			
+			//new String(byte[], charset) : 해당 바이트배열을 charset으로 설정한다.
+			//getBytes(charset) : 해당 문자열을 charset으로 변경하기 위해 byte배열로 리턴한다.
+			headers.add("Content-Disposition", "attachment; filename=" + downloadName);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+				
+		return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
 	}
 	
 	private String getFolder() {

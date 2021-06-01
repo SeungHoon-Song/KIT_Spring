@@ -2,6 +2,7 @@ package com.koreait.service;
 
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,20 +19,18 @@ import lombok.extern.log4j.Log4j;
 @Log4j
 @AllArgsConstructor
 public class BoardServiceImple implements BoardService {
-
-	//@AllArgsConstructor로  @Setter 사용X
 	private BoardMapper mapper;
 	private BoardAttachMapper attachMapper;
 	
 	@Transactional
 	@Override
-	public void register(BoardVO board) {
+	public void register(@Nullable BoardVO board) {
 		log.info("register........." + board);
 		mapper.insertSelectKey_bno(board);
 		
 		List<BoardAttachVO> attachList = board.getAttachList();
-		
-		if(attachList.size() == 0 || attachList == null) {
+		log.info("attachList : " + attachList);
+		if(attachList == null || attachList.size() == 0) {
 			return;
 		}
 		
@@ -46,10 +45,11 @@ public class BoardServiceImple implements BoardService {
 		log.info("get............" + bno);
 		return mapper.read(bno);
 	}
+	
 	/*
-	 *	3개 이상의 DML을 사용한 트랜젝션이 있다면,
-	 *	ROLLBACK의 우선순위가 가장 빠른 것을 가장 먼저 사용해주어야 한다.
-	 *	만약 우선순위에 맞춰서 작성하지 않게 되면 전체 ROLLBACK이 된다.  
+	 * 3개 이상의 DML을 사용한 트랜젝션이 있다면,
+	 * ROLLBACK의 우선순위가 가장 빠른 것을 가장 먼저 사용해주어야 한다.
+	 * 만약 우선순위에 맞춰서 작성하지 않게 되면 전체 ROLLBACK이 된다.
 	 */
 	@Transactional
 	@Override
@@ -58,9 +58,9 @@ public class BoardServiceImple implements BoardService {
 		//첨부파일이 게시글보다 우선순위가 높다(cardinality)
 		//첨부파일 작업이 모두 잘 삭제되고, 게시글의 내용이 수정된다면,
 		//첨부파일 추가 시 충돌이 발생되지 않는다.
-		//만약 이 부분을 지키지 않을 경우 다른 트랜잭션에 의해 롤백될 수 있다(방지할 수 있지만, 안전하게 설계)
+		//만약 이 부분을 지키지 않을 경우 다른 트랜젝션에 의해 롤백될 수 있다(방지할 수 있지만, 안전하게 설계).
 		
-		//테이블 2개 이상
+		//*테이블 2개 이상
 		
 		//1순위 : 전체 삭제
 		attachMapper.deleteAll(board.getBno());
@@ -68,11 +68,13 @@ public class BoardServiceImple implements BoardService {
 		boolean modifyResult = mapper.update(board) == 1;
 		
 		//3순위 : DML
-		if(modifyResult && board.getAttachList().size() > 0 && board.getAttachList() != null) {
-			board.getAttachList().forEach(attach -> {
-				attach.setBno(board.getBno());
-				attachMapper.insert(attach);
-			}); 
+		if(modifyResult && board.getAttachList() != null) {
+			if(board.getAttachList().size() != 0) {
+				board.getAttachList().forEach(attach -> {
+					attach.setBno(board.getBno());
+					attachMapper.insert(attach);
+				});
+			}
 		}
 		return modifyResult;
 	}
@@ -90,22 +92,21 @@ public class BoardServiceImple implements BoardService {
 		log.info("getList............");
 		return mapper.getList();
 	}
-	
+
 	@Override
 	public List<BoardVO> getList(Criteria cri) {
 		log.info("getList with criteria............" + cri);
 		return mapper.getListWithPaging(cri);
 	}
-	
+
 	@Override
 	public int getTotal(Criteria cri) {
 		return mapper.getTotal(cri);
 	}
-	
+
 	@Override
 	public List<BoardAttachVO> getAttachList(Long bno) {
 		log.info("get Attach list by bno" + bno);
 		return attachMapper.findByBno(bno);
 	}
-	
 }

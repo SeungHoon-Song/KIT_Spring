@@ -1,5 +1,14 @@
 package com.koreait.controller;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,8 +16,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.koreait.domain.BoardAttachVO;
 import com.koreait.domain.BoardVO;
 import com.koreait.domain.Criteria;
 import com.koreait.domain.pageDTO;
@@ -44,14 +55,14 @@ public class BoardController {
 		}
 		service.register(board);
 //		model.addAttribute("result", board.getBno());
-		//새롭게 등록된 번호를 .jsp에 전달하기 위해서는 
-		//request객체에 담아야 한다. 하지만 redirect 방식으로 전송할 때에는
+		//새롭게 등록된 번호를 .jsp에 전달하기 위해서는
+		//request객체에 담아야 한다. 하지만 redirect방식으로 전송할 때에는
 		//request가 초기화 된다. 따라서 세션에 있는 Flash영역에 담아놓고
-		//초기화된 request객체에 전달해주면 결과값을 안전하게 이동시킬 수 있다.
-		//이 때 redirectAttributes를 이용한다.
+		//초기화된 request객s체에 전달해주면 결과값을 안전하게 이동시킬 수 있다.
+		//이 때 RedirectAttributes를 이용한다.
 		rttr.addFlashAttribute("result", board.getBno());
 		
-		//'redirect' : 접두어를 사용하면 스프링 MVC가 내부적으로
+		//'redirect:' 접두어를 사용하면 스프링 MVC가 내부적으로
 		//response.sendRedirect()를 처리해준다.
 		return "redirect:/board/list";
 	}
@@ -94,19 +105,52 @@ public class BoardController {
 		return "redirect:/board/list";
 	}
 	//삭제 처리와 테스트 구현
-	@GetMapping("/remove")
-	public String remove(@RequestParam("bno") Long bno, Criteria cri, RedirectAttributes rttr) {
-		log.info("remove : " + bno);
-		if(service.remove(bno)) {
-			rttr.addFlashAttribute("result", "success");
+		@GetMapping("/remove")
+		public String remove(@RequestParam("bno") Long bno, Criteria cri, RedirectAttributes rttr) {
+			log.info("remove : " + bno);
+			List<BoardAttachVO> attachList = service.getAttachList(bno);
+			if(service.remove(bno)) {//DB에서 첨부파일 전체삭제, 게시글 삭제(댓글 삭제)
+				deleteFiles(attachList); //경로에 있는 해당 게시글 첨부 파일 전체 삭제
+				rttr.addFlashAttribute("result", "success");
+			}
+			rttr.addAttribute("pageNum", cri.getPageNum());
+			rttr.addAttribute("amount", cri.getAmount());
+			rttr.addAttribute("keyword", cri.getKeyword());
+			rttr.addAttribute("type", cri.getType());
+			return "redirect:/board/list";
 		}
 		
-		rttr.addAttribute("pageNum", cri.getPageNum());
-		rttr.addAttribute("amount", cri.getAmount());
-		rttr.addAttribute("keyword", cri.getKeyword());
-		rttr.addAttribute("type", cri.getType());
+		@GetMapping(value="/getAttachList", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+		@ResponseBody
+		public ResponseEntity<List<BoardAttachVO>> getAttachList(Long bno){
+			log.info("getAttachList :" + bno);
+			return new ResponseEntity<List<BoardAttachVO>>(service.getAttachList(bno), HttpStatus.OK);
+		}
 		
-		return "redirect:/board/list";
+		private void deleteFiles(List<BoardAttachVO> attachList) {
+			if(attachList == null || attachList.size() == 0) {
+				return;
+			}
+			
+			log.info("delete attach files.......");
+			log.info(attachList);
+
+			attachList.forEach(attach -> {
+				//1. File객체에 담아서 delete()사용
+				//2. Files.delete(Path) : 해당 경로에 있는 파일을 삭제한다.
+				
+				try {
+					Path file = Paths.get("C:\\upload\\" + attach.getUploadPath() + "\\" + attach.getUuid() + "_" + attach.getFileName());
+					Files.delete(file);
+					
+					if(Files.probeContentType(file).startsWith("image")) {
+						Path thumbnail = Paths.get("C:\\upload\\" + attach.getUploadPath() + "\\s_" + attach.getUuid() + "_" + attach.getFileName());
+						Files.delete(thumbnail);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+			});
+		}
 	}
-	
-}
