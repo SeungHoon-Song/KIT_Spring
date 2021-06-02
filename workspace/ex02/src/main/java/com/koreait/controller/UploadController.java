@@ -54,8 +54,10 @@ public class UploadController {
 		
 		try {
 			//헤더에 적절한 파일의 타입을 probeContentType을 통하여 포함시킨다.
+			//브라우저에서 전달한 byte[]을 원상복구 해주어야 하기 때문에 Header에 반드시 Content-Type을 설정해주어야 한다.
 			header.add("Content-Type",  Files.probeContentType(file.toPath()));
-			result = new ResponseEntity<byte[]>(FileCopyUtils.copyToByteArray(file), header,HttpStatus.OK);
+			//응답할 때에는 header까지 포함하여 응답해준다.
+			result = new ResponseEntity<byte[]>(FileCopyUtils.copyToByteArray(file), header, HttpStatus.OK);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -64,14 +66,15 @@ public class UploadController {
 	
 	@PostMapping(value="/uploadAjaxAction", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
+	//외부에서 여러 개의 파일을 전달받는다.
 	public ResponseEntity<AllFileDTO> uploadAjaxAction(MultipartFile[] uploadFile) {
 		log.info("upload ajax post.........");
 		
 		String uploadFolder = "C:\\upload";
 		//사용자가 업로드를 한 시간인 년, 월, 일을 디렉토리로 만드는 getFolder()를 사용한다.
-		String uploadFolderPath = getFolder();
+		String uploadFolderPath = getFolder();	//현재 년월일을 각 디렉터리로 만든 경로
 		File uploadPath = new File(uploadFolder, uploadFolderPath);
-		AllFileDTO allFile = new AllFileDTO();
+		AllFileDTO allFile = new AllFileDTO();	//업로드 성공 리스트와 실패 리스트를 가지고 있는 객체
 		List<BoardAttachVO> succeedList = new ArrayList<>();
 		List<BoardAttachVO> failureList = new ArrayList<>();
 		//만약 해당 디렉토리가 존재하지 않으면
@@ -85,21 +88,22 @@ public class UploadController {
 			log.info("업로드 파일 크기 : " + multipartFile.getSize());
 			BoardAttachVO boardAttachVO = new BoardAttachVO();
 			
-			String uploadFileName = multipartFile.getOriginalFilename();
+			String uploadFileName = multipartFile.getOriginalFilename();	//경로를 제외한 파일 이름 가져오기
 			//IE에서는 파일 이름만 가져오지 않고 전체 경로를 가져오기 때문에 마지막에 위치한 파일 이름만 가져오도록 한다.
 			//IE 이외의 브라우저에서는 \\가 없기 때문에 -1 + 1로 연산되어 0번째 즉, 파일이름을 의미한다.
 			uploadFileName = uploadFileName.substring(uploadFileName.lastIndexOf("\\") + 1);
 			
 			log.info("실제 파일 명 : " + uploadFileName);
+			
 			boardAttachVO.setFileName(uploadFileName);
 			//랜덤한 UUID를 담아놓는다.
 			UUID uuid = UUID.randomUUID();
 			//파일 이름이 중복되더라도 이름 앞에 UUID를 붙여주기 때문에 중복될 가능성이 희박하다.
 			//덮어씌워지는 것을 방지한다.
 			uploadFileName = uuid.toString() + "_" + uploadFileName;
-			InputStream in = null;
+			InputStream in = null;	//외부 파일 불러오기
 			try {
-				File saveFile = new File(uploadPath, uploadFileName);
+				File saveFile = new File(uploadPath, uploadFileName);	//파일이 저장될 경로
 				//업로드
 				multipartFile.transferTo(saveFile);
 				//업로드 된 파일 읽어오기
@@ -108,12 +112,12 @@ public class UploadController {
 				boardAttachVO.setUuid(uuid.toString());
 				boardAttachVO.setUploadPath(uploadFolderPath);
 				
-				if(checkImg(saveFile)) {
+				if(checkImg(saveFile)) {	//이미지일 경우 true
 					boardAttachVO.setFileType(true);
 					//Stream은 파일을 통신할 때 byte가 이동할 경로이다.
 					//썸네일 파일 업로드
 					FileOutputStream thumbnail = new FileOutputStream(new File(uploadPath, "s_" + uploadFileName));
-					//사용자가 첨부한 파일은 multipartFile을 통해서 가져오고, 
+					//사용자가 첨부한 파일은 InputStream을 통해서 가져오고, 
 					//원하는 w, h를 지정한 후 변경된 이미지 파일을 FileOutputStream객체를 통해서 업로드한다.
 					//Thumbnailator는 중간관리의 역할을 한다.
 					Thumbnailator.createThumbnail(in, thumbnail, 100, 100);
@@ -123,13 +127,13 @@ public class UploadController {
 			} catch (Exception e) {
 				failureList.add(boardAttachVO);
 				log.error(e.getMessage());
-			} finally {
-				try {
-					
-				}catch (Exception e) {
-					// TODO: handle exception
+			}  /*finally {	//(2)정확히 닫아야 할 객체를 알고 있을 때
+					try {
+					in.close();
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			}
+			}*/
 		}
 		
 		allFile.setSucceedList(succeedList);
@@ -150,17 +154,21 @@ public class UploadController {
 		File file = null;
 		
 		try {
+			//encodeURIComponent()로 전달받은 fileName을 다시 원래 문자열로 변경해준다.
 			file = new File("C:\\upload\\" + URLDecoder.decode(fileName, "UTF-8"));
-		file.delete();
+			//해당 경로에 있는 파일을 삭제한다.
+			file.delete();
 		
-		if(fileType.equals("image")) {
-			String imgFileName = file.getPath().replace("s_", "");
+		if(fileType.equals("image")) {	//만약 이미지 파일이라면 썸네일은 이미 위에서 삭제되었기 때문에
+			String imgFileName = file.getPath().replace("s_", "");	//기존의 파일명에서 s_를 붙인 것이 바로 썸네일 파일명이다. 기존 파일명에서 s_를 없애서(원본 파일)
 			log.info("imgFileName: " + imgFileName);
 			file = new File(imgFileName);
 			
 			//가비지 컬렉터: 주인이 없는 필드를 직접 찾아서 메모리에서 해제해주는 객체
 			System.gc();	//가비지 컬렉터 호출 - 찾아도 바로 메모리 해제를 하지 않고 세대를 붙여준다. 추후 세대별 메모리 해제는 일괄 처리된다.
 			System.runFinalization();	//세대에 상관없이 필드 메모리 해제(finalization() 호출)
+			
+			//썸네일 파일까지 삭제
 			file.delete();
 		}
 		} catch (UnsupportedEncodingException e) {
@@ -170,21 +178,25 @@ public class UploadController {
 		return new ResponseEntity<String>("delete", HttpStatus.OK);
 	}
 	
+	//응답 시 byte[]로 응답한다.
 	@GetMapping(value="/download", produces=MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	@ResponseBody
+	//브라우저의 종류별로 다운로드 목적 출력 방식이 다르기 때문에 헤더에서 브라우저 정보를 가져온다.
 	public ResponseEntity<Resource> downloadFile(String fileName, @RequestHeader("User-Agent") String userAgent) {
 		log.info("download file: " + fileName);
 		Resource resource = new FileSystemResource("C:\\upload\\" + fileName);
 		log.info("resource: " + resource);
 		
 		String resourceName = resource.getFilename();
-		String originalName = resourceName.substring(resourceName.indexOf("_") +1);
+		String originalName = resourceName.substring(resourceName.indexOf("_") +1);	//uuid를 제외한 원본 파일명
 		HttpHeaders headers = new HttpHeaders();
 		//다운로드 시 저장되는 이름 : Content-Disposition
 		try {
 			String downloadName = null;
-			//Trident : MSIE
+			
+			//브라우저 별로 다운로드 파일명의 인코딩 설정을 진행한다.
 			if(userAgent.contains("Trident")) {
+				//Trident : MSIE
 				log.info("IE Browser로");
 //				downloadName= URLEncoder.encode(resourceName, "UTF-8").replaceAll("\\", "");
 				downloadName= URLEncoder.encode(originalName, "UTF-8");
@@ -218,6 +230,7 @@ public class UploadController {
 	
 	private boolean checkImg(File file) throws IOException{
 		//사용자가 업로드한 파일의 타입 중 앞부분이 image로 시작한다면 이미지 파일이다.
+		//만약 헤더가 깨진 이미지 파일이라면 정상적으로 검사가 되지 않음(image라는 문자열로 시작되지만 그렇게 판단하지 않음)
 		return Files.probeContentType(file.toPath()).startsWith("image");
 	}
 }

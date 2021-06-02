@@ -17,4 +17,8 @@
 	<select id="findByBno" resultType="com.koreait.domain.BoardAttachVO">
 		SELECT * FROM TBL_ATTACH WHERE BNO = #{bno}
 	</select>
+	
+	<select id="getOldFiles" resultType="com.koreait.domain.BoardAttachVO">
+		SELECT * FROM TBL_ATTACH WHERE UPLOADPATH = TO_CHAR(SYSDATE-1, 'YYYY\MM\DD')
+	</select>
 </mapper>

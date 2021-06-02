@@ -102,24 +102,25 @@
                                  <input name="writer" type="text" value="${board.writer}" readonly/>
                               </div>
                               <div class="field uploadDiv">
-                        <div class="field uploadDiv">
-                           <h4>첨부파일</h4>
-                        </div>
-                        <div class="field">
-                           <div class="uploadResult">
-                              <ul></ul>
-                           </div>
-                        </div>
-                        <div class="bigPictureWrapper">
-                           <div class="bigPicture"></div>
-                        </div>
-                           </div>
+			                        <div class="field uploadDiv">
+			                           <h4>첨부파일</h4>
+			                        </div>
+			                        <div class="field">
+			                           <div class="uploadResult">
+			                              <ul></ul>
+			                           </div>
+			                        </div>
+			                        <div class="bigPictureWrapper">
+			                           <div class="bigPicture"></div>
+			                        </div>
+                           	</div>
                            <ul class="actions special">
                               <li>
                                  <input type="button" class="button" value="수정" onclick="location.href='/board/modify${cri.getListLink()}&bno=${board.bno}'"/>
                                  <input type="submit" class="button" value="삭제"/>
                               </li>
                            </ul>
+                           </div>
                            <ul class="icons">
                               <li>
                                  <span class="icon solid fa-envelope"></span>
@@ -163,16 +164,17 @@
    <script>
       $(document).ready(function(){
          
+    	  //썸네일 li태그를 클릭하면 들어옴
          $(".uploadResult").on("click", "li", function(e){
             console.log("view or download")
             var li = $(this);
             var path = encodeURIComponent(li.data("path") + "/" + li.data("uuid") + "_" + li.data("filename"));
             
-            if(li.data("type")){
-               //썸네일
-               showImage(path.replace(new RegExp(/\\/g), "/"));
+            if(li.data("type")){	//type은 true일 경우 이미지이다.
+               //썸네일의 원본 보여주기
+               showImage(path.replace(new RegExp(/\\/g), "/"));	// '\'를 '/'로 모두 변경(\가 JS에서 명령어로 인식될 수 있기 때문)
             }else{
-               //다운로드
+               //다운로드(현재 페이지에서 클릭한 파일 다운로드 받기)
                self.location = "/download?fileName=" + path; 
             }
          });
@@ -196,6 +198,7 @@
          (function(){
             var bno = "${board.bno}";
             console.log(bno);
+            //해당 게시글에 첨부된 모든 파일을 가져온다.
             $.getJSON("/board/getAttachList", {bno:bno}, function(list){
                var str = "";
                
@@ -276,14 +279,14 @@
             var next = endNum * 10 < replyCnt;
             
             if(matchMedia("screen and (max-width:918px)").matches){
-               //918px보다 작을 때
-               if(prev){
-                  str += "<a class='changePage' href='" + (pageNum - 1) + "'><code>&lt;</code></a>";
-               }
-               str += "<code>" + pageNum + "</code>";
-               if(next){
-                  str += "<a class='changePage' href='" + (pageNum + 1) + "'><code>&gt;</code></a>";
-               }
+                //918px보다 작을 때
+                if(pageNum > 1){
+                   str += "<a class='changePage' href='" + (pageNum - 1) + "'><code>&lt;</code></a>";
+                }
+                str += "<code>" + pageNum + "</code>";
+                if(pageNum < realEnd){
+                   str += "<a class='changePage' href='" + (pageNum + 1) + "'><code>&gt;</code></a>";
+                }
             }else{
                //918px 이상일 때
                if(prev){
@@ -329,7 +332,11 @@
                         str += "<strong>" + list[i].replyer + "</strong>";
                         str += "<p class='reply" + list[i].rno + "'>" + list[i].reply + "</p>";
                         str += "<div style='text-align:right;'>";
-                        str += "<a class='modfiy' href='" + list[i].rno + "'>수정</a>";
+                        str += "<strong>" + replyService.displayTime(list[i].replyDate);
+                        if(list[i].replyDate != list[i].updatedate){
+								str += "<br>수정된 날짜 " + replyService.displayTime(list[i].updatedate);
+							}
+						str += "</strong><br><a class='modify' href='" + list[i].rno + "'>수정</a>";
                         str += "<a class='finish' href='" + list[i].rno + "' style='display:none;'>수정완료</a>";
                         str += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                         str += "<a class='remove' href='" + list[i].rno + "'>삭제</a>";
@@ -384,7 +391,7 @@
             
             if(newReply == ""){return;}
             
-            replyService.update({rno:rnoValue, reply:newReply},
+            replyService.modify({rno:rnoValue, reply:newReply},
                   function(result){
                      alert(result);
                      check = false;

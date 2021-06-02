@@ -82,6 +82,7 @@ var replyService = (function(){
 		});
 	}
 	
+	//댓글 조회
 	function get(rno, callback, error){
 	      $.get("/replies/" + rno + ".json", function(result){
 	         if(callback){callback(result);}
@@ -91,8 +92,31 @@ var replyService = (function(){
 	         }
 	      });
 	   }
+	
+	//시간 처리
+	function displayTime(timeValue){
+		var today = new Date();
+		var replyTime = new Date(timeValue);
+		var gap = today.getTime() - replyTime.getTime();
+		
+		if(gap < 24 * 60 * 60 * 1000){
+			//시분초
+			var hh = replyTime.getHours();
+			var mi = replyTime.getMinutes();
+			var ss = replyTime.getSeconds();
+			
+			return [(hh > 9 ? '' : '0') + hh, (mi > 9 ? '' : '0') + mi, (ss > 9 ? '' : '0') + ss].join(' : ');
+		}else{
+			//년월일
+			var yy = replyTime.getFullYear();
+			var mm = replyTime.getMonth() + 1;
+			var dd = replyTime.getDate();
+			
+			return [yy, (mm > 9 ? '' : '0') + mm, (dd > 9 ? '' : '0') + dd].join(' - ');
+		}
+	}
 
 	
 	/*return {name : "AAAA"};*/
-	return {add : add, getList : getList, remove : remove, modify : modify, get : get};
+	return {add : add, getList : getList, remove : remove, modify : modify, get : get, displayTime : displayTime};
 })();	//선언하자마자 ()사용

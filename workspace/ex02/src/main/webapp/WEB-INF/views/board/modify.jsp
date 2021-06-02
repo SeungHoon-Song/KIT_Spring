@@ -206,6 +206,7 @@
 				if(confirm("파일을 삭제하시겠습니까?")){
 					$(this).closest("li").remove();
 				}
+				//수정부분에서는 경로의 파일까지는 삭제하지 않는다.(실시간 DB조회 라이브러리로 해결)
 			});
 			
 			$("input[type='submit']").on("click", function(e){

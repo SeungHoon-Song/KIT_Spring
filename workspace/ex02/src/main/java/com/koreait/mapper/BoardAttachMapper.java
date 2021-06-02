@@ -9,4 +9,5 @@ public interface BoardAttachMapper {	//해당 쿼리문이 실행(서비스, 루
 	public void delete(String uuid);
 	public void deleteAll(Long bno);
 	public List<BoardAttachVO> findByBno(Long bno);
+	public List<BoardAttachVO> getOldFiles();
 }
